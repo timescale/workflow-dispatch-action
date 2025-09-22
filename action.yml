@@ -1,0 +1,29 @@
+name: workflow-dispatch-action
+description: Dispatch a workflow action and wait for it to finish
+
+inputs:
+  github-token:
+    description: The GitHub token used to create an authenticated client
+    default: ${{ github.token }}
+    required: false
+  owner:
+    description: 'The owner of the repo containing the workflow to dispatch'
+    required: true
+  repo:
+    description: 'The name of the repo containing the workflow to dispatch'
+    required: true
+  workflow_id:
+    description: 'The ID of the workflow to dispatch'
+    required: true
+  ref:
+    description: 'The git reference for the workflow to dispatch'
+    required: false
+    default: ${{ github.ref }}
+  inputs:
+    description: 'JSONify string of inputs to pass to the workflow'
+    required: false
+    default: '{}'
+
+runs:
+  using: node20
+  main: dist/index.js
