@@ -38,12 +38,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Setup authenticated git push
+        run: |
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
       - name: Commit and push dist changes
         if: steps.check_dist.outputs.changed == 'true'
         run: |
           git add dist
           git commit -m "Update dist folder [skip ci]"
           git push origin HEAD:main
-        env:
-          # Use the automatically generated token to push
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
