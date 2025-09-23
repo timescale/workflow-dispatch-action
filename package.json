@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Dispatch a workflow action and wait for it to finish",
   "main": "dist/index.js",
+    "engines": {
+    "node": ">=24.0.0"
+  },
   "type": "module",
   "scripts": {
     "build": "ncc build src/index.ts",

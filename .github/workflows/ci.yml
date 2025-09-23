@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24.x'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      # Fail if PR contains changes to dist folder
+      - name: Check for changes in dist folder
+        if: github.event_name == 'pull_request'
+        run: |
+          if git diff --name-only origin/main...HEAD | grep '^dist/'; then
+            echo "Error: Changes to the dist folder are not allowed in pull requests."
+            exit 1
+          else
+            echo "No changes detected in dist folder."
+          fi

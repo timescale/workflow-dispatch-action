@@ -31,7 +31,7 @@ async function main(): Promise<void> {
   let conclusion: string | null = null;
 
   let attempts = 0;
-  const maxAttempts = 12; // 1 minute timeout (12 * 5 seconds)
+  const maxAttempts = 12;
   while (!runId && attempts < maxAttempts) {
     if (attempts > 0) {
       await new Promise((resolve) => setTimeout(resolve, 5000));
