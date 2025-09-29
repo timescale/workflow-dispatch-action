@@ -31810,9 +31810,6 @@ async function main() {
     let attempts = 0;
     const maxAttempts = 12;
     while (!runId && attempts < maxAttempts) {
-        if (attempts > 0) {
-            await new Promise((resolve) => setTimeout(resolve, 5000));
-        }
         const runs = await github.rest.actions.listWorkflowRuns({
             owner,
             repo,
@@ -31826,6 +31823,7 @@ async function main() {
             }
         }
         attempts++;
+        await new Promise((resolve) => setTimeout(resolve, 10000));
     }
     if (!runId) {
         throw new Error('Failed to find workflow run');
@@ -31833,7 +31831,14 @@ async function main() {
     attempts = 0;
     while (!conclusion) {
         if (attempts > 0) {
-            await new Promise((resolve) => setTimeout(resolve, 5000));
+            // Pseudo-exponential backoff, capped at 2 minutes, where the first 2
+            // attempts are 30 seconds apart, the next 5 are 60 seconds apart, and
+            // the rest are 120 seconds apart.
+            // This is to help avoid hitting rate limits on the GitHub API, while
+            // still trying to get the status in a reasonable amount of time between
+            // the workflow finishing upstream and us getting that status here.
+            const waitTime = attempts <= 2 ? 30000 : attempts <= 7 ? 60000 : 120000;
+            await new Promise((resolve) => setTimeout(resolve, waitTime));
         }
         const run = await github.rest.actions.getWorkflowRun({
             owner,
@@ -31841,6 +31846,7 @@ async function main() {
             run_id: runId,
         });
         conclusion = run.data.conclusion;
+        attempts++;
     }
     core.info(`Workflow run ${runId} completed with conclusion: ${conclusion}`);
     if (conclusion !== 'success') {
